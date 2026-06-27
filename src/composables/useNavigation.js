@@ -1,43 +1,43 @@
 import { ref, computed } from 'vue'
 
 const currentView = ref('projects')
-const selectedProject = ref(null)
-const selectedSuite = ref(null)
-const selectedSubSuite = ref(null)
-const selectedTestCase = ref(null)
+const currentProject = ref(null)
+const currentSuite = ref(null)
+const currentSubSuite = ref(null)
+const currentTestCase = ref(null)
 
 const breadcrumbs = computed(() => {
   const crumbs = [{ label: 'Projects', view: 'projects', item: null }]
 
-  if (selectedProject.value) {
+  if (currentProject.value) {
     crumbs.push({
-      label: selectedProject.value.name,
+      label: currentProject.value.name,
       view: 'suites',
-      item: selectedProject.value,
+      item: currentProject.value,
     })
   }
 
-  if (selectedSuite.value) {
+  if (currentSuite.value) {
     crumbs.push({
-      label: selectedSuite.value.name,
+      label: currentSuite.value.name,
       view: 'sub_suites',
-      item: selectedSuite.value,
+      item: currentSuite.value,
     })
   }
 
-  if (selectedSubSuite.value) {
+  if (currentSubSuite.value) {
     crumbs.push({
-      label: selectedSubSuite.value.name,
+      label: currentSubSuite.value.name,
       view: 'test_cases',
-      item: selectedSubSuite.value,
+      item: currentSubSuite.value,
     })
   }
 
-  if (selectedTestCase.value) {
+  if (currentTestCase.value) {
     crumbs.push({
-      label: selectedTestCase.value.title,
+      label: currentTestCase.value.title,
       view: 'test_case_detail',
-      item: selectedTestCase.value,
+      item: currentTestCase.value,
     })
   }
 
@@ -47,49 +47,49 @@ const breadcrumbs = computed(() => {
 export function useNavigation() {
   function navigateTo(view) {
     if (view === 'projects') {
-      selectedProject.value = null
-      selectedSuite.value = null
-      selectedSubSuite.value = null
-      selectedTestCase.value = null
+      currentProject.value = null
+      currentSuite.value = null
+      currentSubSuite.value = null
+      currentTestCase.value = null
     } else if (view === 'suites') {
-      selectedSuite.value = null
-      selectedSubSuite.value = null
-      selectedTestCase.value = null
+      currentSuite.value = null
+      currentSubSuite.value = null
+      currentTestCase.value = null
     } else if (view === 'sub_suites') {
-      selectedSubSuite.value = null
-      selectedTestCase.value = null
+      currentSubSuite.value = null
+      currentTestCase.value = null
     } else if (view === 'test_cases') {
-      selectedTestCase.value = null
+      currentTestCase.value = null
     }
     currentView.value = view
   }
 
   function openProject(project) {
-    selectedProject.value = project
+    currentProject.value = project
     currentView.value = 'suites'
   }
 
   function openSuite(suite) {
-    selectedSuite.value = suite
+    currentSuite.value = suite
     currentView.value = 'sub_suites'
   }
 
   function openSubSuite(subSuite) {
-    selectedSubSuite.value = subSuite
+    currentSubSuite.value = subSuite
     currentView.value = 'test_cases'
   }
 
   function openTestCase(testCase) {
-    selectedTestCase.value = testCase
+    currentTestCase.value = testCase
     currentView.value = 'test_case_detail'
   }
 
   return {
     currentView,
-    selectedProject,
-    selectedSuite,
-    selectedSubSuite,
-    selectedTestCase,
+    currentProject,
+    currentSuite,
+    currentSubSuite,
+    currentTestCase,
     breadcrumbs,
     navigateTo,
     openProject,

@@ -1,57 +1,64 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-import { supabase } from './lib/supabase'
+import { computed } from 'vue'
+import { useNavigation } from '@/composables/useNavigation'
+import AppBreadcrumbs from '@/components/ui/AppBreadcrumbs.vue'
+import ProjectsList from '@/components/views/ProjectsList.vue'
+import SuitesList from '@/components/views/SuitesList.vue'
+import TestCasesList from '@/components/views/testCasesList.vue'
 
-const projects = ref([])
-const loading = ref(false)
-const error = ref(null)
+const { currentView, currentProject, currentSuite, navigateTo } = useNavigation()
 
-async function getProjects() {
-  loading.value = true
-  error.value = null
-
-  const { data, error: supabaseError } = await supabase
-    .from('projects')
-    .select(`
-      id,
-      name,
-      description,
-      created_at
-    `)
-
-  if (supabaseError) {
-    error.value = supabaseError.message
-  } else {
-    projects.value = data
-    console.log(data)
+// مسیریابی داینامیک کامپوننت‌ها
+const activeComponent = computed(() => {
+  switch (currentView.value) {
+    case 'projects': return ProjectsList
+    case 'suites': return SuitesList
+    case 'test-cases': return TestCasesList
+    default: return ProjectsList
   }
-
-  loading.value = false
-}
-
-onMounted(getProjects)
+})
 </script>
 
 <template>
-  <div class="container">
-    <h1>Projects</h1>
+  <div class="app-container">
+    <header class="topbar">
+      <div class="topbar-logo" @click="navigateTo('projects')" style="cursor: pointer;">
+        🧪 <span>TestSpace</span>
+      </div>
+      <nav class="topbar-nav">
+        <a :class="{ active: currentView === 'projects' }" @click="navigateTo('projects')">Projects</a>
+      </nav>
+      <div class="topbar-right">
+        <div class="avatar">QA</div>
+      </div>
+    </header>
 
-    <p v-if="loading">Loading...</p>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">Workspace</div>
+        <div class="sidebar-item" :class="{ active: currentView === 'projects' }" @click="navigateTo('projects')">
+          <span class="dot" style="background: var(--blue)"></span> All Projects
+        </div>
 
-    <p v-else-if="error">{{ error }}</p>
+        <template v-if="currentProject">
+          <div class="sidebar-section">Active Project</div>
+          <div class="sidebar-item active" @click="navigateTo('suites')">
+            <span class="dot" style="background: var(--purple)"></span> {{ currentProject.name }}
+          </div>
+        </template>
 
-    <p v-else-if="projects.length === 0">
-      No projects found.
-    </p>
+        <template v-if="currentSuite">
+          <div class="sidebar-section">Active Suite</div>
+          <div class="sidebar-item active">
+            <span class="dot" style="background: var(--orange)"></span> {{ currentSuite.name }}
+          </div>
+        </template>
+      </aside>
 
-    <ul v-else>
-      <li
-        v-for="project in projects"
-        :key="project.id"
-      >
-        <h3>{{ project.name }}</h3>
-        <p>{{ project.description }}</p>
-      </li>
-    </ul>
+      <main class="main">
+        <AppBreadcrumbs />
+        <component :is="activeComponent" />
+      </main>
+    </div>
   </div>
 </template>
